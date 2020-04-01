@@ -4,11 +4,12 @@ import static com.google.ads.mediation.facebook.FacebookAdapter.KEY_ID;
 import static com.google.ads.mediation.facebook.FacebookAdapter.KEY_SOCIAL_CONTEXT_ASSET;
 import static com.google.ads.mediation.facebook.FacebookAdapter.TAG;
 import static com.google.ads.mediation.facebook.FacebookAdapter.setMixedAudience;
-import static com.google.ads.mediation.facebook.FacebookMediationAdapter.ERROR_INVALID_REQUEST;
+import static com.google.ads.mediation.facebook.FacebookMediationAdapter.ERROR_INVALID_SERVER_PARAMETERS;
 import static com.google.ads.mediation.facebook.FacebookMediationAdapter.ERROR_MAPPING_NATIVE_ASSETS;
 import static com.google.ads.mediation.facebook.FacebookMediationAdapter.ERROR_NULL_CONTEXT;
 import static com.google.ads.mediation.facebook.FacebookMediationAdapter.ERROR_WRONG_NATIVE_TYPE;
 import static com.google.ads.mediation.facebook.FacebookMediationAdapter.createAdapterError;
+import static com.google.ads.mediation.facebook.FacebookMediationAdapter.createSdkError;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -58,7 +59,7 @@ public class FacebookRtbNativeAd extends UnifiedNativeAdMapper {
     Bundle serverParameters = adConfiguration.getServerParameters();
     String placementID = FacebookMediationAdapter.getPlacementID(serverParameters);
     if (TextUtils.isEmpty(placementID)) {
-      String errorMessage = createAdapterError(ERROR_INVALID_REQUEST,
+      String errorMessage = createAdapterError(ERROR_INVALID_SERVER_PARAMETERS,
           "Failed to request ad, placementID is null or empty.");
       Log.e(TAG, errorMessage);
       callback.onFailure(errorMessage);
@@ -158,11 +159,9 @@ public class FacebookRtbNativeAd extends UnifiedNativeAdMapper {
 
     @Override
     public void onError(Ad ad, AdError adError) {
-      String errorMessage = adError.getErrorMessage();
-      if (!TextUtils.isEmpty(errorMessage)) {
-        Log.w(TAG, errorMessage);
-      }
-      callback.onFailure(adError.getErrorMessage());
+      String errorMessage = createSdkError(adError);
+      Log.w(TAG, errorMessage);
+      callback.onFailure(errorMessage);
     }
 
     @Override
